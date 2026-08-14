@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gm-mcp"
+version = "0.1.0"
+description = "GoodMorning MCP tool registry and client primitives"
+requires-python = ">=3.12"
+dependencies = ["httpx>=0.27,<1"]
+
+[tool.setuptools.packages.find]
+include = ["gm_mcp*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
