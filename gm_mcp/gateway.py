@@ -7,6 +7,7 @@ whose handlers call their existing application services and receive a trusted
 
 from __future__ import annotations
 
+from html import escape
 import inspect
 import json
 import uuid
@@ -133,7 +134,8 @@ def create_gateway_app(
         async def login_form(request_id: str) -> Any:
             if oauth.pending(request_id) is None:
                 return HTMLResponse("Authorization request expired.", status_code=400)
-            return HTMLResponse("""<html><body><h1>GoodMorning MCP authorization</h1><form method='post'><input type='hidden' name='request_id' value='""" + request_id + """'><label>Email <input name='email' type='email' required></label><label>Password <input name='password' type='password' required></label><button type='submit'>Authorize</button></form></body></html>""")
+            safe_request_id = escape(request_id, quote=True)
+            return HTMLResponse("""<html><body><h1>GoodMorning MCP authorization</h1><form method='post'><input type='hidden' name='request_id' value='""" + safe_request_id + """'><label>Email <input name='email' type='email' required></label><label>Password <input name='password' type='password' required></label><button type='submit'>Authorize</button></form></body></html>""")
 
         @app.post("/oauth/login")
         async def login_submit(request: Request) -> Any:
