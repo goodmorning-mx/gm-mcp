@@ -32,3 +32,31 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual(done.content, 4)
         with self.assertRaises(PermissionDenied):
             asyncio.run(registry.invoke(ToolCall("students.archive", {"student_id": 4}), RequestContext("u1", "o1", "academy", frozenset({"read"}))))
+
+    def test_durable_intent_store_receives_actor_and_confirmation_metadata(self):
+        class Store:
+            def __init__(self):
+                self.calls = []
+
+            def preview(self, **kwargs):
+                self.calls.append(("preview", kwargs))
+                return {"intent_id": "intent-1", "confirmation_token": "token-1"}
+
+            def confirm(self, **kwargs):
+                self.calls.append(("confirm", kwargs))
+                return kwargs["execute"]()
+
+        store = Store()
+        registry = ToolRegistry(intent_store=store)
+
+        @tool(name="students.create", description="Create", input_schema={"type": "object"}, permission=Permission.WRITE, write=True, requires_confirmation=True)
+        def create(*, context, name):
+            return {"created": name}
+
+        registry.register(create)
+        context = RequestContext("user-1", "org-1", "demo", frozenset({"write"}), oauth_client_id="client-1")
+        pending = asyncio.run(registry.invoke(ToolCall("students.create", {"name": "Ana"}, idempotency_key="key-1"), context))
+        self.assertTrue(pending.requires_confirmation)
+        done = asyncio.run(registry.invoke(ToolCall("students.create", {"name": "Ana"}, confirmed=True, intent_id="intent-1", confirmation_token="token-1"), context))
+        self.assertEqual(done.content, {"created": "Ana"})
+        self.assertEqual(store.calls[0][1]["context"].oauth_client_id, "client-1")
