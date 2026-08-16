@@ -1,9 +1,9 @@
 {
   "name": "gm-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "kind": "backend",
   "backend_package": "gm-mcp",
-  "python_requires": ["httpx>=0.27,<1"],
+  "python_requires": ["httpx>=0.27,<1", "fastapi>=0.115,<1"],
   "deployment_modes": ["embedded", "gateway"],
   "default_deployment_mode": "embedded",
   "resource_requirements": [
@@ -13,7 +13,7 @@
       "resource_name": "mcp-gateway",
       "deployment_modes": ["gateway"],
       "base_directory": "/backend",
-      "dockerfile": "/Dockerfile",
+      "dockerfile": "/Dockerfile.mcp",
       "port": 8200,
       "public": true,
       "health_path": "/health"

@@ -1,5 +1,20 @@
 # gm-mcp
 
+`gm-mcp` is the shared Operations MCP Gateway for GoodMorning products. It
+supports embedded registries and a remote Streamable HTTP gateway without
+duplicating product business logic.
+
+Products register namespaced adapters with `ToolRegistry` and create an ASGI
+app using `create_gateway_app`. The product supplies authentication/context
+resolution and an audit sink; every handler receives the trusted
+`RequestContext`.
+
+The remote endpoint implements `initialize`, `tools/list`, and `tools/call` at
+`POST /mcp`, plus temporary `/tools` compatibility endpoints. Writes can be
+marked `requires_confirmation=True`; the first call returns a confirmation
+request and the confirmed call is audited with user, organization, product,
+request, tool, and outcome metadata. `/health` is unauthenticated.
+
 Reusable MCP primitives for GoodMorning products. Product code registers
 adapters around existing services; the registry never accesses a product
 database directly. The intended path is:

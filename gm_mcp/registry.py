@@ -20,12 +20,14 @@ class Tool:
     permission: Permission = Permission.READ
     write: bool = False
     requires_confirmation: bool = False
+    output_schema: dict[str, Any] | None = None
 
     def metadata(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "description": self.description,
             "inputSchema": self.input_schema,
+            **({"outputSchema": self.output_schema} if self.output_schema is not None else {}),
             "metadata": {
                 "permission": self.permission.value,
                 "readOnly": not self.write,
@@ -91,8 +93,9 @@ def tool(
     permission: Permission = Permission.READ,
     write: bool = False,
     requires_confirmation: bool = False,
+    output_schema: dict[str, Any] | None = None,
 ) -> Callable[[ServiceCallable], Tool]:
     """Decorate a product service adapter as an MCP tool definition."""
     def decorator(handler: ServiceCallable) -> Tool:
-        return Tool(name, description, input_schema, handler, permission, write, requires_confirmation)
+        return Tool(name, description, input_schema, handler, permission, write, requires_confirmation, output_schema)
     return decorator
