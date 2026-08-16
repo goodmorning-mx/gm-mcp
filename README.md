@@ -10,9 +10,12 @@ resolution and an audit sink; every handler receives the trusted
 `RequestContext`.
 
 The remote endpoint implements `initialize`, `tools/list`, and `tools/call` at
-`POST /mcp`, plus temporary `/tools` compatibility endpoints. Writes can be
-marked `requires_confirmation=True`; the first call returns a confirmation
-request and the confirmed call is audited with user, organization, product,
+`POST /mcp`, plus temporary `/tools` compatibility endpoints. Gateways can
+enable OAuth 2.1 Authorization Code + S256 PKCE with dynamic client
+registration, resource-bound short-lived access tokens, and rotating refresh
+tokens. Writes can be marked `requires_confirmation=True`; products may attach
+a durable intent store so the first call previews an intent and the confirmed
+call is audited with user, organization, product,
 request, tool, and outcome metadata. `/health` is unauthenticated.
 
 Reusable MCP primitives for GoodMorning products. Product code registers
