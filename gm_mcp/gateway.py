@@ -21,6 +21,7 @@ from .context import RequestContext
 from .oauth import OAuthProvider, OAuthProtocolError
 from .registry import ToolCall, ToolRegistry
 from .security import PermissionDenied
+from . import __version__
 
 
 class ContextResolver(Protocol):
@@ -214,7 +215,7 @@ def create_gateway_app(
                 return JSONResponse({"jsonrpc": "2.0", "id": request_id, "result": {
                     "protocolVersion": body.get("params", {}).get("protocolVersion", "2025-03-26"),
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": name, "version": "0.2.0"},
+                    "serverInfo": {"name": name, "version": __version__},
                 }})
             if method == "tools/list":
                 return JSONResponse({"jsonrpc": "2.0", "id": request_id, "result": {"tools": registry.list()}})
