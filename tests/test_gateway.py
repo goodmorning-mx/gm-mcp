@@ -21,6 +21,8 @@ def test_streamable_http_lists_and_calls_tools_with_product_context():
     )
     client = TestClient(app)
     assert client.get("/health").json()["status"] == "ok"
+    initialized = client.post("/mcp", json={"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {}}, headers={"authorization": "Bearer test"})
+    assert initialized.json()["result"]["serverInfo"]["version"] == "0.3.1"
     listing = client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
     assert listing.status_code == 200
     assert listing.json()["result"]["tools"][0]["name"] == "students.find"

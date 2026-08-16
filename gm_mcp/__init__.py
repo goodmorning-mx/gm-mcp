@@ -1,3 +1,5 @@
+__version__ = "0.3.1"
+
 from .client import MCPClient, MCPError
 from .context import RequestContext
 from .registry import Tool, ToolCall, ToolRegistry, ToolResult, tool
