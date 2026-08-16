@@ -19,5 +19,11 @@
       "health_path": "/health"
     }
   ],
-  "bindings": []
+  "bindings": [
+    {
+      "key": "MCP_OAUTH_SECRET",
+      "source": "generated_secret",
+      "target": "mcp-gateway"
+    }
+  ]
 }
