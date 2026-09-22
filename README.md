@@ -28,6 +28,11 @@ The package supplies namespaced tool metadata, JSON input schemas, user/org/
 product context, read/write permissions, explicit confirmation gates, and a
 small HTTP client for remote MCP servers.
 
+Product handlers may return ordinary JSON values, including arrays; the HTTP
+gateway serializes those values into a single MCP text block. Handlers that
+already return a non-empty list of valid MCP content blocks keep those blocks
+unchanged.
+
 ```python
 from gm_mcp import Permission, RequestContext, ToolRegistry, tool
 

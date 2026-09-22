@@ -55,6 +55,38 @@ def _tool_call(body: dict[str, Any], *, params: bool = False) -> ToolCall:
     )
 
 
+def _is_content_block(value: Any) -> bool:
+    """Return whether a value is a well-shaped MCP content block."""
+    if not isinstance(value, dict):
+        return False
+
+    content_type = value.get("type")
+    if not isinstance(content_type, str):
+        return False
+    if content_type == "text":
+        return isinstance(value.get("text"), str)
+    if content_type in {"image", "audio"}:
+        return isinstance(value.get("data"), str) and isinstance(value.get("mimeType"), str)
+    if content_type == "resource":
+        return isinstance(value.get("resource"), dict)
+    if content_type == "resource_link":
+        return isinstance(value.get("uri"), str) and isinstance(value.get("name"), str)
+    return False
+
+
+def _mcp_content_blocks(value: Any) -> list[dict[str, Any]]:
+    """Encode product data as text, preserving only explicit MCP content blocks.
+
+    Product service results are often lists (for example, groups or teachers),
+    but MCP's ``content`` field is a list of typed content blocks. Treat a list
+    as preformatted MCP content only when every non-empty item has a valid
+    block shape; all other values are represented as one JSON text block.
+    """
+    if isinstance(value, list) and value and all(_is_content_block(item) for item in value):
+        return value
+    return [{"type": "text", "text": json.dumps(value, ensure_ascii=False, default=str)}]
+
+
 async def _resolve(resolver: ContextResolver, request: Request) -> RequestContext:
     value = resolver(request)
     if inspect.isawaitable(value):
@@ -223,7 +255,7 @@ def create_gateway_app(
                 params = body.get("params", {})
                 call = _tool_call(body, params=True)
                 result = await invoke(call, context)
-                content = result.content if isinstance(result.content, list) else [{"type": "text", "text": json.dumps(result.content, ensure_ascii=False, default=str)}]
+                content = _mcp_content_blocks(result.content)
                 return JSONResponse({"jsonrpc": "2.0", "id": request_id, "result": {
                     "content": content, "isError": result.is_error,
                     **({"_meta": {"requiresConfirmation": True}} if result.requires_confirmation else {}),
